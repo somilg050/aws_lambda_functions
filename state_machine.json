@@ -1,0 +1,161 @@
+{
+  "Comment": "A description of my state machine",
+  "StartAt": "Proxy 1",
+  "States": {
+    "Proxy 1": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "arn:aws:lambda:*******:function:apiProxy1:$LATEST"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Pass"
+    },
+    "Pass": {
+      "Type": "Pass",
+      "Next": "Choice"
+    },
+    "Choice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.statusCode",
+          "NumericEquals": 200,
+          "Next": "Pass (1)"
+        }
+      ],
+      "Default": "Pass (7)"
+    },
+    "Pass (7)": {
+      "Type": "Pass",
+      "Next": "Wait"
+    },
+    "Wait": {
+      "Type": "Wait",
+      "Seconds": 5,
+      "Next": "Proxy 2"
+    },
+    "Pass (1)": {
+      "Type": "Pass",
+      "Next": "Success - 1"
+    },
+    "Success - 1": {
+      "Type": "Succeed"
+    },
+    "Proxy 2": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "arn:aws:lambda:*****:function:apiProxy2:$LATEST"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Pass (8)"
+    },
+    "Pass (8)": {
+      "Type": "Pass",
+      "Next": "Choice (1)"
+    },
+    "Choice (1)": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.statusCode",
+          "NumericEquals": 200,
+          "Next": "Pass (2)"
+        }
+      ],
+      "Default": "Pass (3)"
+    },
+    "Pass (3)": {
+      "Type": "Pass",
+      "Next": "Proxy 3"
+    },
+    "Pass (2)": {
+      "Type": "Pass",
+      "Next": "Success -2"
+    },
+    "Success -2": {
+      "Type": "Succeed"
+    },
+    "Proxy 3": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "arn:aws:lambda:*******:function:apiProxy3:$LATEST"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Pass (4)"
+    },
+    "Pass (4)": {
+      "Type": "Pass",
+      "Next": "Choice (2)"
+    },
+    "Choice (2)": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.statusCode",
+          "NumericEquals": 200,
+          "Next": "Pass (5)"
+        }
+      ],
+      "Default": "Pass (6)"
+    },
+    "Pass (6)": {
+      "Type": "Pass",
+      "Next": "Failure"
+    },
+    "Pass (5)": {
+      "Type": "Pass",
+      "Next": "Success - 3"
+    },
+    "Success - 3": {
+      "Type": "Succeed"
+    },
+    "Failure": {
+      "Type": "Succeed"
+    }
+  }
+}
